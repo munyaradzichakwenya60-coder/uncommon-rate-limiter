@@ -458,18 +458,18 @@ btnBurst10.addEventListener('click', () => {
   showToast(`Executed 10x Burst for ${getSelectedKey()}`, 'warning');
 });
 
-const ICON_AUTO_SPAM = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg><span>Auto-Spam</span>`;
-const ICON_STOP_SPAM = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg><span>Stop Spam</span>`;
+const TEXT_AUTO_SPAM = `<span>Auto-Spam</span>`;
+const TEXT_STOP_SPAM = `<span>Stop Spam</span>`;
 
 btnAutoSpam.addEventListener('click', () => {
   if (spamIntervalId !== null) {
     window.clearInterval(spamIntervalId);
     spamIntervalId = null;
-    btnAutoSpam.innerHTML = ICON_AUTO_SPAM;
+    btnAutoSpam.innerHTML = TEXT_AUTO_SPAM;
     btnAutoSpam.classList.remove('btn-upstash-danger');
     showToast('Auto-spam generator halted', 'info');
   } else {
-    btnAutoSpam.innerHTML = ICON_STOP_SPAM;
+    btnAutoSpam.innerHTML = TEXT_STOP_SPAM;
     btnAutoSpam.classList.add('btn-upstash-danger');
     showToast('Continuous auto-spam generator active', 'warning');
     spamIntervalId = window.setInterval(() => {
@@ -500,7 +500,7 @@ btnRefresh.addEventListener('click', () => {
   if (spamIntervalId !== null) {
     window.clearInterval(spamIntervalId);
     spamIntervalId = null;
-    btnAutoSpam.innerHTML = ICON_AUTO_SPAM;
+    btnAutoSpam.innerHTML = TEXT_AUTO_SPAM;
     btnAutoSpam.classList.remove('btn-upstash-danger');
   }
   inMemoryStore = new InMemoryStore();
