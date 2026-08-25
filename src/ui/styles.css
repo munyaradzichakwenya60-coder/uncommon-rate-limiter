@@ -191,6 +191,7 @@ body {
 }
 
 .minimal-team-switcher {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -211,6 +212,7 @@ body {
 .minimal-team-switcher .team-switcher-icon {
   color: var(--uncommon-blue);
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 .minimal-team-switcher .team-switcher-label {
@@ -218,6 +220,7 @@ body {
   font-size: 0.75rem;
   font-weight: 600;
   user-select: none;
+  pointer-events: none;
 }
 
 .minimal-select {
@@ -229,10 +232,7 @@ body {
   cursor: pointer;
   outline: none;
   font-family: var(--font-sans);
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  padding-right: 0.25rem;
+  padding: 0.15rem 0.25rem;
 }
 
 .minimal-select option {

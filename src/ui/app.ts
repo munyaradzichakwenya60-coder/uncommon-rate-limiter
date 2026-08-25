@@ -346,7 +346,7 @@ function renderTopUsers() {
       .slice(0, 5)
       .map(
         (u, idx) => `
-      <div class="top-user-item ${u.key === activeKey ? 'top-user-active' : ''}">
+      <div class="top-user-item ${u.key === activeKey ? 'top-user-active' : ''}" onclick="window.switchActiveClient('${escapeHtml(u.key)}')" style="cursor:pointer;" title="Click to select ${escapeHtml(u.key)}">
         <div class="user-identity">
           <span style="color:var(--text-light);font-size:0.75rem;">#${idx + 1}</span>
           <span style="${u.key === activeKey ? 'font-weight:700;color:var(--uncommon-blue);' : ''}">${escapeHtml(u.key)}</span>
@@ -368,7 +368,7 @@ function renderTopUsers() {
       .slice(0, 5)
       .map(
         (u, idx) => `
-      <div class="top-user-item ${u.key === activeKey ? 'top-user-active' : ''}">
+      <div class="top-user-item ${u.key === activeKey ? 'top-user-active' : ''}" onclick="window.switchActiveClient('${escapeHtml(u.key)}')" style="cursor:pointer;" title="Click to select ${escapeHtml(u.key)}">
         <div class="user-identity">
           <span style="color:var(--text-light);font-size:0.75rem;">#${idx + 1}</span>
           <span style="${u.key === activeKey ? 'font-weight:700;color:var(--uncommon-blue);' : ''}">${escapeHtml(u.key)}</span>
@@ -509,6 +509,48 @@ btnRefresh.addEventListener('click', () => {
   showToast('Store and limiter reset', 'success');
   updateUI();
 });
+
+declare global {
+  interface Window {
+    switchActiveClient: (key: string) => void;
+  }
+}
+
+window.switchActiveClient = (key: string) => {
+  if (!teamSelect) return;
+  let exists = false;
+  for (let i = 0; i < teamSelect.options.length; i++) {
+    const opt = teamSelect.options[i];
+    if (opt && opt.value === key) {
+      exists = true;
+      break;
+    }
+  }
+  if (!exists) {
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.text = key;
+    teamSelect.appendChild(opt);
+  }
+  teamSelect.value = key;
+  showToast(`Active client switched to: ${key}`, 'info');
+  updateUI();
+};
+
+const teamSwitcherBox = document.querySelector('.minimal-team-switcher') as HTMLElement | null;
+if (teamSwitcherBox) {
+  teamSwitcherBox.addEventListener('click', (e) => {
+    if (e.target !== teamSelect) {
+      teamSelect.focus();
+      if (typeof (teamSelect as HTMLSelectElement & { showPicker?: () => void }).showPicker === 'function') {
+        try {
+          (teamSelect as HTMLSelectElement & { showPicker?: () => void }).showPicker?.();
+        } catch {
+        }
+      }
+    }
+  });
+}
 
 teamSelect.addEventListener('change', () => {
   showToast(`Active client switched to: ${getSelectedKey()}`, 'info');
