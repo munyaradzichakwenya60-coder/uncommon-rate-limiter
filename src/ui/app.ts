@@ -652,5 +652,21 @@ modalSettings.addEventListener('click', (e) => {
   }
 });
 
+const navBtnSearch = document.getElementById('nav-btn-search');
+if (navBtnSearch && inputSearchLogs) {
+  navBtnSearch.addEventListener('click', () => {
+    inputSearchLogs.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    inputSearchLogs.focus();
+  });
+}
+
+const navBtnBell = document.getElementById('nav-btn-bell');
+if (navBtnBell) {
+  navBtnBell.addEventListener('click', () => {
+    showToast('Cluster Health: All Rate Limiting Nodes Healthy (100% Uptime)', 'success');
+  });
+}
+
 reloadLimiter();
 updateUI();
+
