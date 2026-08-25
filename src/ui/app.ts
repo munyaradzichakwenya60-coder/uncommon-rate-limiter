@@ -74,7 +74,7 @@ let currentFilter: 'all' | 'allowed' | 'blocked' | 'current-client' = 'all';
 let searchQuery = '';
 
 function seedInitialData() {
-  const seedUsers = ['client_alpha', 'client_beta', '192.168.1.104', 'api_gateway', 'user_checkout'];
+  const seedUsers = ['munyaradzi', 'mac', '192.168.1.104', 'api_gateway', 'user_checkout'];
   seedUsers.forEach((user, idx) => {
     const baseAllowed = (5 - idx) * 18 + 5;
     const baseBlocked = idx === 0 ? 12 : idx === 2 ? 8 : 2;
@@ -167,7 +167,7 @@ function formatNumber(num: number): string {
 }
 
 function getSelectedKey(): string {
-  return teamSelect.value || 'client_alpha';
+  return teamSelect.value || 'munyaradzi';
 }
 
 function reloadLimiter() {
