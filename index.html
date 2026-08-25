@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rate Limit Analytics | Uncommon.org</title>
+  <link rel="stylesheet" href="./src/ui/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231E60EC'/><circle cx='50' cy='50' r='30' fill='none' stroke='%23FFFFFF' stroke-width='10'/></svg>">
+</head>
+<body>
+
+  <header class="upstash-header minimal-navbar">
+    <div class="header-inner minimal-navbar-inner">
+      
+      <div class="minimal-nav-left">
+        <nav class="nav-links minimal-nav-links">
+          <button id="nav-sliding" class="nav-link minimal-nav-item active" title="Sliding Window Log Algorithm">
+            <span>Sliding Window</span>
+          </button>
+          <button id="nav-bucket" class="nav-link minimal-nav-item" title="Token Bucket Algorithm">
+            <span>Token Bucket</span>
+          </button>
+          <button id="nav-sys-design" class="nav-link minimal-nav-item" title="Distributed System Design Architecture">
+            <span>System Design</span>
+            <span class="nav-badge-pill minimal-pill">Part 2</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="minimal-nav-center">
+        <a href="#" class="minimal-brand-emblem" title="Uncommon Rate Limiter">
+          <span class="minimal-brand-text">uncommon<span class="minimal-brand-dot">.org</span></span>
+        </a>
+      </div>
+
+      <div class="minimal-nav-right">
+        <div class="team-switcher minimal-team-switcher" title="Active Client Tenant Context">
+          <svg class="team-switcher-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span class="team-switcher-label">Client:</span>
+          <select id="team-select" class="team-switcher-select minimal-select">
+            <option value="client_alpha">client_alpha</option>
+            <option value="client_beta">client_beta</option>
+            <option value="192.168.1.104">192.168.1.104</option>
+            <option value="api_gateway">api_gateway</option>
+            <option value="user_checkout">user_checkout</option>
+          </select>
+          <svg class="team-switcher-arrow" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+
+        <button id="btn-open-settings" class="icon-button minimal-icon-button" title="Configure Rate Limiting Parameters">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="main-wrapper">
+
+    <div class="page-title-row">
+      <div>
+        <h1 class="page-title">Rate Limit Analytics</h1>
+        <p id="page-policy-desc" class="page-description">Active Algorithm: <strong>Sliding Window Log</strong> &bull; Window: 10s &bull; Max: 5 reqs</p>
+      </div>
+      <div id="active-policy-tag" class="active-policy-text">
+        Sliding Window Log
+      </div>
+    </div>
+
+    <section class="metrics-deck-container">
+      <div class="metrics-deck-header">
+        <span>Session Request Aggregates</span>
+      </div>
+      <div class="metrics-cards-grid">
+        <div class="metric-stat-box">
+          <div class="metric-stat-label">Allowed</div>
+          <div id="stat-allowed" class="metric-stat-number allowed-num">0</div>
+        </div>
+        <div class="metric-stat-box">
+          <div class="metric-stat-label">Blocked</div>
+          <div id="stat-blocked" class="metric-stat-number blocked-num">0</div>
+        </div>
+        <div class="metric-stat-box">
+          <div class="metric-stat-label">Total</div>
+          <div id="stat-total" class="metric-stat-number">0</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="action-filter-bar">
+      <div class="filter-left-group">
+        <span class="filter-label-text">Filter</span>
+        <select id="filter-select" class="filter-dropdown-select">
+          <option value="all">All Traffic</option>
+          <option value="allowed">Allowed Only (200 OK)</option>
+          <option value="blocked">Blocked Only (429)</option>
+          <option value="current-client">Active Client Only</option>
+        </select>
+      </div>
+
+      <div class="action-buttons-group">
+        <button id="btn-send-request" class="btn-upstash-primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+          <span>Send Request (<code>allow</code>)</span>
+        </button>
+        <button id="btn-burst-5" class="btn-upstash-secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>Burst 5x</span>
+        </button>
+        <button id="btn-burst-10" class="btn-upstash-secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+          </svg>
+          <span>Burst 10x</span>
+        </button>
+        <button id="btn-auto-spam" class="btn-upstash-secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Auto-Spam</span>
+        </button>
+        <button id="btn-step-clock" class="btn-upstash-secondary" title="Advance Injectable MockClock by +5s">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span>Step +5s</span>
+        </button>
+        <button id="btn-cleanup" class="btn-upstash-secondary" title="Trigger TTL Idle Key Pruning">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>TTL Cleanup</span>
+        </button>
+        <button id="btn-refresh" class="btn-refresh-square" title="Reset Session & Store">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <polyline points="23 20 23 14 17 14"></polyline>
+            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <section class="chart-card">
+      <div class="chart-card-header">
+        <h2 class="chart-card-title">Requests over time</h2>
+      </div>
+
+      <div class="chart-canvas-wrapper">
+        <div class="chart-grid-axis">
+          <span id="chart-y-max">200</span>
+          <span id="chart-y-mid">100</span>
+          <span>0</span>
+        </div>
+        <div class="chart-grid-lines">
+          <div class="chart-grid-line"></div>
+          <div class="chart-grid-line"></div>
+          <div class="chart-grid-line"></div>
+        </div>
+        <div id="chart-bars-container" class="chart-bars-container"></div>
+      </div>
+
+      <div class="chart-legend">
+        <div class="legend-item">
+          <span class="legend-square allowed"></span>
+          <span>Allowed</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-square blocked"></span>
+          <span>Blocked</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="breakdown-grid-row">
+      <section class="breakdown-card">
+        <h3 class="breakdown-card-title">Top Users (Allowed)</h3>
+        <div id="list-top-allowed" class="top-users-list"></div>
+      </section>
+
+      <section class="breakdown-card">
+        <h3 class="breakdown-card-title">Top Users (Blocked)</h3>
+        <div id="list-top-blocked" class="top-users-list"></div>
+      </section>
+    </div>
+
+    <section class="audit-stream-card">
+      <div class="audit-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+        <div>
+          <h3 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary);">
+            Live Request Stream Audit
+          </h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Real-time in-process evaluation</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <input type="text" id="input-search-logs" placeholder="Search by client key..." class="form-input-field" style="width: 180px; padding: 0.35rem 0.65rem; font-size: 0.75rem;">
+          <button id="btn-export-logs" class="btn-upstash-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">Export CSV</button>
+          <button id="btn-clear-logs" class="btn-upstash-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.75rem;">Clear</button>
+        </div>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Client Key</th>
+              <th>Policy</th>
+              <th>Decision</th>
+              <th>Remaining Quota</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="modal-settings" class="modal-backdrop">
+    <div class="modal-card">
+      <button id="btn-close-settings" class="modal-close-btn">&times;</button>
+      <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.25rem;">
+        <div style="width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--uncommon-light-blue); display: flex; align-items: center; justify-content: center; color: var(--uncommon-blue);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary);">
+          Rate Limiter Engine Settings
+        </h3>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem; margin-top: 0.25rem;">
+        Adjust rate limiting parameters dynamically to test boundary handling.
+      </p>
+
+      <div style="margin-bottom: 1.25rem;">
+        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Sliding Window Log Strategy (Core)
+        </h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group-block">
+            <label class="form-label-title" for="modal-max-req">Max Requests (N)</label>
+            <input type="number" id="modal-max-req" class="form-input-field" value="5" min="1" max="500">
+          </div>
+          <div class="form-group-block">
+            <label class="form-label-title" for="modal-win-sec">Window Seconds (W)</label>
+            <input type="number" id="modal-win-sec" class="form-input-field" value="10" min="1" max="600">
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Token Bucket Strategy (Bonus)
+        </h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="form-group-block">
+            <label class="form-label-title" for="modal-capacity">Bucket Capacity (C)</label>
+            <input type="number" id="modal-capacity" class="form-input-field" value="10" min="1" max="500">
+          </div>
+          <div class="form-group-block">
+            <label class="form-label-title" for="modal-refill-rate">Refill Rate (R/sec)</label>
+            <input type="number" id="modal-refill-rate" class="form-input-field" value="2" min="0.1" step="0.5" max="100">
+          </div>
+        </div>
+      </div>
+
+      <button id="btn-save-settings" class="btn-upstash-primary" style="width: 100%; justify-content: center; padding: 0.65rem;">
+        Apply & Reload
+      </button>
+    </div>
+  </div>
+
+  <div id="modal-sys-design" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 800px;">
+      <button id="btn-close-sys-design" class="modal-close-btn">&times;</button>
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <div style="width: 42px; height: 42px; border-radius: var(--radius-md); background: var(--uncommon-light-blue); display: flex; align-items: center; justify-content: center; color: var(--uncommon-blue); flex-shrink: 0;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">
+            Part 2: Notification Service Architecture
+          </h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">
+            10M+ notifications/day • Distributed Idempotency • Multi-Channel • Resilient Failovers
+          </p>
+        </div>
+      </div>
+
+      <div style="background: #F8FAFC; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
+        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+          Key Architecture Guarantees
+        </h4>
+        <ul style="font-size: 0.825rem; color: var(--text-secondary); padding-left: 1.25rem; line-height: 1.7;">
+          <li><strong>Throughput Math:</strong> 10M/day (~115 req/sec avg, peaking at 5,000–10,000 req/sec during campaigns).</li>
+          <li><strong>Priority Queues:</strong> Dual Kafka topics (Transactional high-priority vs Bulk marketing low-priority).</li>
+          <li><strong>Deduplication & Idempotency:</strong> Redis distributed locks with 24-hour idempotent deduplication windows.</li>
+          <li><strong>Vendor Resiliency:</strong> Circuit breakers & automatic fallbacks (SendGrid → AWS SES, Twilio → MessageBird).</li>
+          <li><strong>User Controls:</strong> Preference resolver, per-channel opt-outs, and localized quiet hours enforcement.</li>
+        </ul>
+      </div>
+
+      <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+        Detailed PostgreSQL schemas, event schemas, queue consumer topologies, and Mermaid diagrams are fully documented in <code>SYSTEM_DESIGN.md</code>.
+      </p>
+
+      <div style="text-align: right;">
+        <button onclick="document.getElementById('modal-sys-design').classList.remove('open')" class="btn-upstash-primary">
+          Close Overview
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module" src="./src/ui/app.ts"></script>
+</body>
+</html>
